@@ -1,5 +1,5 @@
 <template>
-  <h1 class="title">{{label}}</h1>
+  <h1 class="title">{{ label }}</h1>
   <div :class="`card p-4 mb-5`">
     <div class="field">
       <label class="label">Component name</label>
@@ -13,11 +13,22 @@
       </div>
     </div>
     <div class="field">
+      <label class="label">Component type</label>
+      <div class="control">
+        <input
+            class="input"
+            type="text"
+            v-model="formInputData.type"
+            @input="editorChangeHandler('type', $event.target.value)"
+            placeholder="dropdown">
+      </div>
+    </div>
+    <div class="field">
       <label class="label">Component code</label>
       <div class="control">
           <textarea
-              v-model="formInputData.content"
-              @input="editorChangeHandler('content', $event.target.value)"
+              v-model="formInputData.code"
+              @input="editorChangeHandler('code', $event.target.value)"
               class="textarea"
               placeholder="Write component code..."
           />
@@ -49,7 +60,8 @@ const emits = defineEmits(['dataUpdated']);
 
 const formInputData = reactive({
   title: '',
-  content: '',
+  type: '',
+  code: '',
 });
 
 const editorChangeHandler = (inputName, editorContent) => {
@@ -60,7 +72,8 @@ const editorChangeHandler = (inputName, editorContent) => {
 onMounted(() => {
   if (props.componentData) {
     formInputData.title = props.componentData.title;
-    formInputData.content = props.componentData.content;
+    formInputData.type = props.componentData.type;
+    formInputData.code = props.componentData.code;
   }
 });
 
