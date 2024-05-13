@@ -61,5 +61,7 @@ const dateFormatted = computed(() => {
 .type {
   margin-bottom: 12px;
 }
-
+.content pre {
+  background-color: black;
+}
 </style>
