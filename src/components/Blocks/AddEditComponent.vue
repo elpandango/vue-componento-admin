@@ -14,13 +14,17 @@
     </div>
     <div class="field">
       <label class="label">Component type</label>
-      <div class="control">
-        <input
-            class="input"
-            type="text"
-            v-model="formInputData.type"
-            @input="editorChangeHandler('type', $event.target.value)"
-            placeholder="dropdown">
+
+      <div class="select">
+        <select v-model="selectedOption"
+                @change="editorChangeHandler('type', $event.target.value)">
+          <option disabled value="">Please select component type</option>
+          <option
+              v-for="option in storeComponents.componentTypes"
+              :key="option.name"
+              :value=option.name>{{ option.name }}
+          </option>
+        </select>
       </div>
     </div>
     <div class="field">
@@ -44,7 +48,8 @@
 </template>
 
 <script setup>
-import {reactive, onMounted} from "vue";
+import {ref, reactive, onMounted} from "vue";
+import {useStoreComponents} from "@/stores/storeComponents.js";
 
 const props = defineProps({
   componentData: {
@@ -64,9 +69,14 @@ const formInputData = reactive({
   code: '',
 });
 
+const selectedOption = ref('option1');
+
 const editorChangeHandler = (inputName, editorContent) => {
   formInputData[inputName] = editorContent;
   emits('dataUpdated', formInputData);
+  if (inputName === 'type') {
+    selectedOption.value = editorContent;
+  }
 };
 
 onMounted(() => {
@@ -74,7 +84,9 @@ onMounted(() => {
     formInputData.title = props.componentData.title;
     formInputData.type = props.componentData.type;
     formInputData.code = props.componentData.code;
+    selectedOption.value = props.componentData.type;
   }
 });
 
+const storeComponents = useStoreComponents();
 </script>

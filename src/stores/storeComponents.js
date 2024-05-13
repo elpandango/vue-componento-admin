@@ -1,7 +1,6 @@
 import {defineStore} from 'pinia';
 import {collection, doc, addDoc, deleteDoc, updateDoc, onSnapshot, query, orderBy} from "firebase/firestore";
 import {db} from '@/js/firebase.js';
-import {useStoreAuth} from "@/stores/storeAuth.js";
 
 let componentsCollectionRef;
 let componentsCollectionQuery;
@@ -11,16 +10,18 @@ export const useStoreComponents = defineStore('storeComponents', {
   state: () => {
     return {
       components: [],
-      componentsLoaded: false
+      componentTypes: [],
+      componentsLoaded: false,
+      componentTypesLoaded: false,
     }
   },
   actions: {
     async init() {
-      const storeAuth = useStoreAuth();
       componentsCollectionRef = collection(db, "components");
       componentsCollectionQuery = query(componentsCollectionRef, orderBy("date", "desc"));
 
       await this.getComponents();
+      await this.getComponentTypes();
     },
     async getComponents() {
       this.componentsLoaded = false;
@@ -40,10 +41,28 @@ export const useStoreComponents = defineStore('storeComponents', {
         this.componentsLoaded = true;
       });
     },
+    async getComponentTypes() {
+      this.componentTypesLoaded = false;
+      const componentsCollRef = collection(db, "componentTypes");
+      const componentsCollQuery = query(componentsCollRef, orderBy("name", "desc"));
+      getComponentsSnapshot = onSnapshot(componentsCollQuery, (querySnapshot) => {
+        let types = [];
+        querySnapshot.forEach((doc) => {
+          const type = {
+            id: doc.id,
+            name: doc.data().name,
+          };
+          types.push(type);
+        });
+
+        this.componentTypes = types;
+        this.componentTypesLoaded = true;
+      });
+    },
     clearComponents() {
       this.components = [];
       if (getComponentsSnapshot) {
-        getComponentsSnapshot(); // unsubscribe from any active listener
+        getComponentsSnapshot();
       }
     },
     async addComponent(newComponentValue) {
@@ -63,26 +82,13 @@ export const useStoreComponents = defineStore('storeComponents', {
       await updateDoc(componentRef, {
         content: contentToUpdate
       });
-
     }
   },
   getters: {
     getComponentContent: (state) => {
       return (id) => {
-        return state.components.filter(component => component.id === id)[0].content;
+        return state?.components?.filter(component => component?.id === id)[0]?.content;
       }
     },
-    totalNotesCount: (state) => {
-      return state.components.length;
-    },
-    totalCharactersCount: (state) => {
-      let count = 0;
-      count = state.components.reduce((accumulator, currentValue) => {
-        if (currentValue?.content?.length) {
-          return accumulator + currentValue.content.length;
-        }
-      }, 0);
-      return count;
-    }
   },
 })
