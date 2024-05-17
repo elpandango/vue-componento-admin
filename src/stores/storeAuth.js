@@ -15,7 +15,6 @@ export const useStoreAuth = defineStore('storeAuth', {
       const storeComponents = useStoreComponents();
 
       await onAuthStateChanged(auth, (user) => {
-        console.log('user: ', user);
         if (user) {
           this.user.id = user.uid;
           this.user.email = user.email;
@@ -29,7 +28,6 @@ export const useStoreAuth = defineStore('storeAuth', {
           storeComponents.clearComponents();
         }
       });
-      console.log('init finished');
     },
     registerUser({email, password}) {
       createUserWithEmailAndPassword(auth, email, password)
